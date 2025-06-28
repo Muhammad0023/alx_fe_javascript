@@ -75,7 +75,7 @@ function populateCategories() {
 }
 
 // -------- Add New Quote --------
-function addQuote() {
+async function addQuote() {
   const text = document.getElementById("newQuoteText").value.trim();
   const category = document.getElementById("newQuoteCategory").value.trim();
 
@@ -91,8 +91,8 @@ function addQuote() {
   document.getElementById("categoryFilter").value = category;
   filterQuotes();
 
-  // Post to server (simulate)
-  postQuoteToServer(newQuote);
+  // Post to server
+  await postQuoteToServer(newQuote);
 
   document.getElementById("newQuoteText").value = "";
   document.getElementById("newQuoteCategory").value = "";
@@ -161,54 +161,53 @@ function importFromJsonFile(event) {
   reader.readAsText(file);
 }
 
-// ✅ -------- Server Interaction --------
+// ✅ -------- Server Interaction with async/await --------
 
 // Fetch quotes from server (simulate GET)
-function fetchQuotesFromServer() {
-  fetch(serverURL)
-    .then(res => res.json())
-    .then(() => {
-      const serverQuotes = [
-        { text: "Server Quote 1", category: "Server" },
-        { text: "Server Quote 2", category: "Server" }
-      ];
+async function fetchQuotesFromServer() {
+  try {
+    const response = await fetch(serverURL);
+    await response.json(); // Simulate real fetch
 
-      serverQuotes.forEach(sq => {
-        const exists = quotes.find(lq => lq.text === sq.text);
-        if (!exists) {
-          quotes.push(sq);
-        }
-      });
+    const serverQuotes = [
+      { text: "Server Quote 1", category: "Server" },
+      { text: "Server Quote 2", category: "Server" }
+    ];
 
-      saveQuotes();
-      populateCategories();
-      filterQuotes();
-      notify("Fetched and synced with server.");
-    })
-    .catch(() => {
-      notify("Failed to fetch from server.", true);
+    serverQuotes.forEach(sq => {
+      const exists = quotes.find(lq => lq.text === sq.text);
+      if (!exists) {
+        quotes.push(sq);
+      }
     });
+
+    saveQuotes();
+    populateCategories();
+    filterQuotes();
+    notify("Fetched and synced with server.");
+  } catch {
+    notify("Failed to fetch from server.", true);
+  }
 }
 
 // Post new quote to server (simulate POST)
-function postQuoteToServer(quote) {
-  fetch(serverURL, {
-    method: "POST",
-    body: JSON.stringify(quote),
-    headers: { "Content-type": "application/json; charset=UTF-8" }
-  })
-    .then(res => res.json())
-    .then(() => {
-      notify("Quote synced to server.");
-    })
-    .catch(() => {
-      notify("Failed to sync to server.", true);
+async function postQuoteToServer(quote) {
+  try {
+    const response = await fetch(serverURL, {
+      method: "POST",
+      body: JSON.stringify(quote),
+      headers: { "Content-type": "application/json; charset=UTF-8" }
     });
+    await response.json();
+    notify("Quote synced to server.");
+  } catch {
+    notify("Failed to sync to server.", true);
+  }
 }
 
 // Sync function (calls fetch from server)
-function syncQuotes() {
-  fetchQuotesFromServer();
+async function syncQuotes() {
+  await fetchQuotesFromServer();
 }
 
 // Periodic sync every 1 minute
