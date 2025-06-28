@@ -98,7 +98,7 @@ async function addQuote() {
   document.getElementById("newQuoteText").value = "";
   document.getElementById("newQuoteCategory").value = "";
 
-  notify("Quote added and synced.");
+  notify("Quotes synced with server!");
 }
 
 // -------- Create Add Form --------
@@ -185,7 +185,7 @@ async function fetchQuotesFromServer() {
     saveQuotes();
     populateCategories();
     filterQuotes();
-    notify("Fetched and synced with server.");
+    notify("Quotes synced with server!");
   } catch {
     notify("Failed to fetch from server.", true);
   }
@@ -202,7 +202,7 @@ async function postQuoteToServer(quote) {
       }
     });
     await response.json();
-    notify("Quote synced to server.");
+    notify("Quotes synced with server!");
   } catch {
     notify("Failed to sync to server.", true);
   }
