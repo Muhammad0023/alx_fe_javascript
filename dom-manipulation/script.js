@@ -1,12 +1,12 @@
 const serverURL = "https://jsonplaceholder.typicode.com/posts";
 
 let quotes = [
-  { text: "Believe you can and you're halfway there.", category: "Motivation" },
-  { text: "Life is what happens when you're busy making other plans.", category: "Life" },
-  { text: "The purpose of our lives is to be happy.", category: "Happiness" }
+  { text: "Believe in yourself.", category: "Motivation" },
+  { text: "Life is beautiful.", category: "Life" },
+  { text: "Happiness is a choice.", category: "Happiness" }
 ];
 
-// -------- Local Storage Handling --------
+// -------- Local Storage --------
 function saveQuotes() {
   localStorage.setItem("quotes", JSON.stringify(quotes));
 }
@@ -18,7 +18,7 @@ function loadQuotes() {
   }
 }
 
-// -------- UI Notifications --------
+// -------- Notification --------
 function notify(message, isError = false) {
   const div = document.getElementById("syncStatus");
   div.style.color = isError ? "red" : "green";
@@ -28,21 +28,23 @@ function notify(message, isError = false) {
   }, 4000);
 }
 
-// -------- Display Random Quote --------
+// -------- Random Quote --------
 function showRandomQuote() {
   filterQuotes();
 }
 
-// -------- Filter Quotes by Category --------
+// -------- Filter Quotes --------
 function filterQuotes() {
   const selected = document.getElementById("categoryFilter").value;
   localStorage.setItem("selectedCategory", selected);
 
-  const filtered = selected === "all" ? quotes : quotes.filter(q => q.category === selected);
+  const filtered = selected === "all"
+    ? quotes
+    : quotes.filter(q => q.category === selected);
 
   const quoteDiv = document.getElementById("quoteDisplay");
   if (filtered.length === 0) {
-    quoteDiv.innerHTML = "<p>No quotes found for this category.</p>";
+    quoteDiv.innerHTML = "<p>No quotes for this category.</p>";
     return;
   }
 
@@ -54,7 +56,7 @@ function filterQuotes() {
   sessionStorage.setItem("lastQuote", random.text);
 }
 
-// -------- Populate Categories --------
+// -------- Categories --------
 function populateCategories() {
   const select = document.getElementById("categoryFilter");
   select.innerHTML = '<option value="all">All Categories</option>';
@@ -74,7 +76,7 @@ function populateCategories() {
   }
 }
 
-// -------- Add New Quote --------
+// -------- Add Quote --------
 async function addQuote() {
   const text = document.getElementById("newQuoteText").value.trim();
   const category = document.getElementById("newQuoteCategory").value.trim();
@@ -91,16 +93,15 @@ async function addQuote() {
   document.getElementById("categoryFilter").value = category;
   filterQuotes();
 
-  // Post to server
   await postQuoteToServer(newQuote);
 
   document.getElementById("newQuoteText").value = "";
   document.getElementById("newQuoteCategory").value = "";
 
-  notify("New quote added and synced.");
+  notify("Quote added and synced.");
 }
 
-// -------- Create Add Quote Form --------
+// -------- Create Add Form --------
 function createAddQuoteForm() {
   const container = document.getElementById("formContainer");
   container.innerHTML = "";
@@ -122,7 +123,7 @@ function createAddQuoteForm() {
   container.appendChild(button);
 }
 
-// -------- Export Quotes to JSON --------
+// -------- Export --------
 function exportQuotes() {
   const data = JSON.stringify(quotes, null, 2);
   const blob = new Blob([data], { type: "application/json" });
@@ -136,7 +137,7 @@ function exportQuotes() {
   URL.revokeObjectURL(url);
 }
 
-// -------- Import Quotes from JSON --------
+// -------- Import --------
 function importFromJsonFile(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -153,7 +154,7 @@ function importFromJsonFile(event) {
       saveQuotes();
       populateCategories();
       filterQuotes();
-      notify("Quotes imported successfully.");
+      notify("Quotes imported.");
     } catch {
       alert("Invalid JSON file.");
     }
@@ -161,13 +162,13 @@ function importFromJsonFile(event) {
   reader.readAsText(file);
 }
 
-// ✅ -------- Server Interaction with async/await --------
+// ✅ -------- Server Interaction --------
 
-// Fetch quotes from server (simulate GET)
+// ✔️ GET - Fetch Quotes from Server
 async function fetchQuotesFromServer() {
   try {
     const response = await fetch(serverURL);
-    await response.json(); // Simulate real fetch
+    await response.json(); // Simulate
 
     const serverQuotes = [
       { text: "Server Quote 1", category: "Server" },
@@ -190,13 +191,15 @@ async function fetchQuotesFromServer() {
   }
 }
 
-// Post new quote to server (simulate POST)
+// ✔️ POST - Send Quote to Server (with Content-Type header)
 async function postQuoteToServer(quote) {
   try {
     const response = await fetch(serverURL, {
       method: "POST",
       body: JSON.stringify(quote),
-      headers: { "Content-type": "application/json; charset=UTF-8" }
+      headers: {
+        "Content-Type": "application/json; charset=UTF-8"
+      }
     });
     await response.json();
     notify("Quote synced to server.");
@@ -205,12 +208,12 @@ async function postQuoteToServer(quote) {
   }
 }
 
-// Sync function (calls fetch from server)
+// ✔️ Sync Function
 async function syncQuotes() {
   await fetchQuotesFromServer();
 }
 
-// Periodic sync every 1 minute
+// ✔️ Periodic Sync (every 60 seconds)
 setInterval(syncQuotes, 60000);
 
 // ✅ -------- Initialize --------
