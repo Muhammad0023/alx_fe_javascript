@@ -210,7 +210,7 @@ async function syncQuotes() {
     saveQuotes();
     populateCategories();
     showRandomQuote();
-    notification.textContent = "Synced with server. Server data took precedence.";
+    notification.textContent = "Quotes synced with server!";
   }
 }
 
