@@ -1,5 +1,6 @@
 // Array to store quotes
 let quotes = [];
+let serverQuotes = []; // Simulate server-side quotes
 
 // DOM elements
 const quoteDisplay = document.getElementById("quoteDisplay");
@@ -7,6 +8,8 @@ const newQuoteBtn = document.getElementById("newQuote");
 const categoryFilter = document.getElementById("categoryFilter");
 const exportQuotesBtn = document.getElementById("exportQuotes");
 const importFileInput = document.getElementById("importFile");
+const syncServerBtn = document.getElementById("syncServer");
+const notification = document.getElementById("notification");
 
 // Function to create the "Add Quote" form dynamically
 function createAddQuoteForm() {
@@ -117,7 +120,7 @@ function addQuote() {
     document.getElementById("newQuoteText").value = "";
     document.getElementById("newQuoteCategory").value = "";
     saveQuotes();
-    populateCategories(); // Update the category dropdown
+    populateCategories();
     showRandomQuote();
   } else {
     alert("Please enter both a quote and a category.");
@@ -147,20 +150,52 @@ function importFromJsonFile(event) {
       const importedQuotes = JSON.parse(event.target.result);
       quotes.push(...importedQuotes);
       saveQuotes();
-      populateCategories(); // Update the category dropdown
+      populateCategories();
       showRandomQuote();
-      alert("Quotes imported successfully!");
+      notification.textContent = "Quotes imported successfully!";
     } catch (error) {
-      alert("Error importing quotes. Please check the file format.");
+      notification.textContent = "Error importing quotes. Please check the file format.";
     }
   };
   fileReader.readAsText(event.target.files[0]);
+}
+
+// Simulate fetching quotes from a server
+async function fetchQuotesFromServer() {
+  try {
+    // Simulate API call to JSONPlaceholder
+    const response = await fetch("https://jsonplaceholder.typicode.com/posts");
+    const data = await response.json();
+    // Mock: Convert posts to quotes format
+    serverQuotes = data.slice(0, 5).map(post => ({
+      text: post.title,
+      category: "Server"
+    }));
+    notification.textContent = "Fetched quotes from server.";
+  } catch (error) {
+    notification.textContent = "Failed to fetch quotes from server.";
+  }
+}
+
+// Sync local quotes with server quotes
+function syncWithServer() {
+  fetchQuotesFromServer().then(() => {
+    // Simple conflict resolution: server data takes precedence
+    if (serverQuotes.length > 0) {
+      quotes = [...serverQuotes, ...quotes];
+      saveQuotes();
+      populateCategories();
+      showRandomQuote();
+      notification.textContent = "Synced with server. Server data took precedence.";
+    }
+  });
 }
 
 // Event listeners
 newQuoteBtn.addEventListener("click", showRandomQuote);
 exportQuotesBtn.addEventListener("click", exportToJsonFile);
 importFileInput.addEventListener("change", importFromJsonFile);
+syncServerBtn.addEventListener("click", syncWithServer);
 
 // Initialize
 loadQuotes();

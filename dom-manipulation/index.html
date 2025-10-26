@@ -30,18 +30,23 @@
     button {
       margin: 5px;
     }
+    #notification {
+      color: green;
+      margin: 10px 0;
+    }
   </style>
 </head>
 <body>
   <h1>Dynamic Quote Generator</h1>
   <select id="categoryFilter" onchange="filterQuotes()">
     <option value="all">All Categories</option>
-    <!-- Categories will be populated dynamically -->
   </select>
   <div id="quoteDisplay"></div>
   <button id="newQuote">Show New Quote</button>
   <button id="exportQuotes">Export Quotes</button>
   <input type="file" id="importFile" accept=".json" />
+  <button id="syncServer">Sync with Server</button>
+  <div id="notification"></div>
 
   <script src="script.js"></script>
 </body>
