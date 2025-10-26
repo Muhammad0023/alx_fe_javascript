@@ -140,6 +140,7 @@ function exportToJsonFile() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+  notification.textContent = "Quotes exported successfully!";
 }
 
 // Import quotes from a JSON file
@@ -163,7 +164,6 @@ function importFromJsonFile(event) {
 // Simulate fetching quotes from a server
 async function fetchQuotesFromServer() {
   try {
-    // Simulate API call to JSONPlaceholder
     const response = await fetch("https://jsonplaceholder.typicode.com/posts");
     const data = await response.json();
     // Mock: Convert posts to quotes format
@@ -172,30 +172,56 @@ async function fetchQuotesFromServer() {
       category: "Server"
     }));
     notification.textContent = "Fetched quotes from server.";
+    return serverQuotes;
   } catch (error) {
     notification.textContent = "Failed to fetch quotes from server.";
+    return [];
+  }
+}
+
+// Simulate sending quotes to the server
+async function sendQuotesToServer() {
+  try {
+    const response = await fetch("https://jsonplaceholder.typicode.com/posts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(quotes),
+    });
+    if (response.ok) {
+      notification.textContent = "Quotes sent to server successfully!";
+    } else {
+      notification.textContent = "Failed to send quotes to server.";
+    }
+  } catch (error) {
+    notification.textContent = "Error sending quotes to server.";
   }
 }
 
 // Sync local quotes with server quotes
-function syncWithServer() {
-  fetchQuotesFromServer().then(() => {
-    // Simple conflict resolution: server data takes precedence
-    if (serverQuotes.length > 0) {
-      quotes = [...serverQuotes, ...quotes];
-      saveQuotes();
-      populateCategories();
-      showRandomQuote();
-      notification.textContent = "Synced with server. Server data took precedence.";
-    }
-  });
+async function syncQuotes() {
+  const serverData = await fetchQuotesFromServer();
+  if (serverData.length > 0) {
+    // Conflict resolution: server data takes precedence
+    const serverQuoteTexts = serverData.map(q => q.text);
+    quotes = quotes.filter(q => !serverQuoteTexts.includes(q.text)); // Remove duplicates
+    quotes = [...serverData, ...quotes]; // Merge server and local data
+    saveQuotes();
+    populateCategories();
+    showRandomQuote();
+    notification.textContent = "Synced with server. Server data took precedence.";
+  }
 }
+
+// Periodically check for new quotes from the server
+setInterval(syncQuotes, 30000); // Sync every 30 seconds
 
 // Event listeners
 newQuoteBtn.addEventListener("click", showRandomQuote);
 exportQuotesBtn.addEventListener("click", exportToJsonFile);
 importFileInput.addEventListener("change", importFromJsonFile);
-syncServerBtn.addEventListener("click", syncWithServer);
+syncServerBtn.addEventListener("click", syncQuotes);
 
 // Initialize
 loadQuotes();
