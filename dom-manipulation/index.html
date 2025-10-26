@@ -24,7 +24,7 @@
       font-weight: bold;
       margin-top: 10px;
     }
-    #categorySelect {
+    #categoryFilter {
       margin: 10px 0;
     }
     button {
@@ -34,8 +34,9 @@
 </head>
 <body>
   <h1>Dynamic Quote Generator</h1>
-  <select id="categorySelect">
+  <select id="categoryFilter" onchange="filterQuotes()">
     <option value="all">All Categories</option>
+    <!-- Categories will be populated dynamically -->
   </select>
   <div id="quoteDisplay"></div>
   <button id="newQuote">Show New Quote</button>

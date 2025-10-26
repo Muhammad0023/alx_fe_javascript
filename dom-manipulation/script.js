@@ -4,7 +4,7 @@ let quotes = [];
 // DOM elements
 const quoteDisplay = document.getElementById("quoteDisplay");
 const newQuoteBtn = document.getElementById("newQuote");
-const categorySelect = document.getElementById("categorySelect");
+const categoryFilter = document.getElementById("categoryFilter");
 const exportQuotesBtn = document.getElementById("exportQuotes");
 const importFileInput = document.getElementById("importFile");
 
@@ -55,9 +55,35 @@ function loadQuotes() {
   }
 }
 
+// Function to populate the category filter dropdown
+function populateCategories() {
+  const categories = [...new Set(quotes.map(quote => quote.category))];
+  categoryFilter.innerHTML = '<option value="all">All Categories</option>';
+
+  categories.forEach(category => {
+    const option = document.createElement("option");
+    option.value = category;
+    option.textContent = category;
+    categoryFilter.appendChild(option);
+  });
+
+  // Load the last selected category from localStorage
+  const lastSelectedCategory = localStorage.getItem("lastSelectedCategory");
+  if (lastSelectedCategory) {
+    categoryFilter.value = lastSelectedCategory;
+  }
+}
+
+// Function to filter quotes based on the selected category
+function filterQuotes() {
+  const selectedCategory = categoryFilter.value;
+  localStorage.setItem("lastSelectedCategory", selectedCategory);
+  showRandomQuote();
+}
+
 // Display a random quote
 function showRandomQuote() {
-  const selectedCategory = categorySelect.value;
+  const selectedCategory = categoryFilter.value;
   let filteredQuotes = quotes;
 
   if (selectedCategory !== "all") {
@@ -91,24 +117,11 @@ function addQuote() {
     document.getElementById("newQuoteText").value = "";
     document.getElementById("newQuoteCategory").value = "";
     saveQuotes();
-    updateCategoryDropdown();
+    populateCategories(); // Update the category dropdown
     showRandomQuote();
   } else {
     alert("Please enter both a quote and a category.");
   }
-}
-
-// Update the category dropdown
-function updateCategoryDropdown() {
-  const categories = [...new Set(quotes.map(quote => quote.category))];
-  categorySelect.innerHTML = '<option value="all">All Categories</option>';
-
-  categories.forEach(category => {
-    const option = document.createElement("option");
-    option.value = category;
-    option.textContent = category;
-    categorySelect.appendChild(option);
-  });
 }
 
 // Export quotes to a JSON file
@@ -134,7 +147,7 @@ function importFromJsonFile(event) {
       const importedQuotes = JSON.parse(event.target.result);
       quotes.push(...importedQuotes);
       saveQuotes();
-      updateCategoryDropdown();
+      populateCategories(); // Update the category dropdown
       showRandomQuote();
       alert("Quotes imported successfully!");
     } catch (error) {
@@ -146,12 +159,11 @@ function importFromJsonFile(event) {
 
 // Event listeners
 newQuoteBtn.addEventListener("click", showRandomQuote);
-categorySelect.addEventListener("change", showRandomQuote);
 exportQuotesBtn.addEventListener("click", exportToJsonFile);
 importFileInput.addEventListener("change", importFromJsonFile);
 
 // Initialize
 loadQuotes();
 createAddQuoteForm();
-updateCategoryDropdown();
+populateCategories();
 showRandomQuote();
